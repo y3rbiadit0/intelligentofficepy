@@ -72,19 +72,22 @@ class TestIntelligentOffice(unittest.TestCase):
             self.assertFalse(self.intelligent_office.blinds_open)
 
 
+    @patch.object(GPIO, "input")
     @patch.object(GPIO, "output")
-    def test_manage_light_level_turn_on(self, led_sensor_mock: Mock):
+    def test_manage_light_level_turn_on(self, led_sensor_mock: Mock, infrared_sensor_mock: Mock):
+        infrared_sensor_mock.return_value = True
         with patch("mock.adafruit_veml7700.VEML7700.lux", PropertyMock()) as mock_lux:
             mock_lux.return_value = 499.0
 
-            
             self.intelligent_office.manage_light_level()
 
             led_sensor_mock.assert_called_once_with(self.intelligent_office.LED_PIN, True)
             self.assertTrue(self.intelligent_office.light_on)
 
+    @patch.object(GPIO, "input")
     @patch.object(GPIO, "output")
-    def test_manage_light_level_turn_off(self, led_sensor_mock: Mock):
+    def test_manage_light_level_turn_off(self, led_sensor_mock: Mock, infrared_sensor_mock: Mock):
+        infrared_sensor_mock.return_value = True
         with patch("mock.adafruit_veml7700.VEML7700.lux", PropertyMock()) as mock_lux:
             mock_lux.return_value = 551.0
 

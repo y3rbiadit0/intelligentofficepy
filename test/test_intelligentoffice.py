@@ -34,11 +34,12 @@ class TestIntelligentOffice(unittest.TestCase):
             infrared_sensor_mock.assert_called_with(infrared_pin)
             self.assertFalse(is_occupied)
 
-    @patch.object(GPIO, "input")
-    def test_check_quadrant_occupancy_not_valid_pin(self, infrared_sensor_mock: Mock):
-        infrared_sensor_mock.return_value = True
+    def test_check_quadrant_occupancy_not_valid_pin(self):
         intelligent_office = IntelligentOffice()
         not_valid_infrared_pin = intelligent_office.LED_PIN
 
         self.assertRaises(IntelligentOfficeError, intelligent_office.check_quadrant_occupancy, not_valid_infrared_pin)
 
+    @patch.object(GPIO, "input")
+    def test_check_quadrant_occupancy_not_valid_pin(self, infrared_sensor_mock: Mock):
+        pass

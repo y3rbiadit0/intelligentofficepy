@@ -11,10 +11,7 @@ class TestIntelligentOffice(unittest.TestCase):
     
     def setUp(self):
         self.intelligent_office = IntelligentOffice()
-        self.infrared_pins = [self.intelligent_office.INFRARED_PIN1,
-         self.intelligent_office.INFRARED_PIN2,
-         self.intelligent_office.INFRARED_PIN3,
-         self.intelligent_office.INFRARED_PIN4]
+        self.infrared_pins = [self.intelligent_office.INFRARED_PIN1, self.intelligent_office.INFRARED_PIN2, self.intelligent_office.INFRARED_PIN3, self.intelligent_office.INFRARED_PIN4]
     
     @patch.object(GPIO, "input")
     def test_check_quadrant_occupancy_occupied(self, infrared_sensor_mock: Mock):
@@ -91,26 +88,32 @@ class TestIntelligentOffice(unittest.TestCase):
         with patch("mock.adafruit_veml7700.VEML7700.lux", PropertyMock()) as mock_lux:
             mock_lux.return_value = 551.0
 
-            
             self.intelligent_office.manage_light_level()
 
             led_sensor_mock.assert_called_once_with(self.intelligent_office.LED_PIN, False)
             self.assertFalse(self.intelligent_office.light_on)
 
-    @patch.object(GPIO, "output")
-    def test_manage_light_level(self, led_sensor_mock: Mock):
-        # When the last worker leaves the office (i.e., the office is now vacant), the 
-        # system stops regulating the light level in the office (User Story #3) and then
-        # turns off the smart lightbulb. On the other hand, the system resumes regulating
-        # the light level when a worker goes back into the office.
+    @patch.object(GPIO, "input")
+    def test_manage_light_level_turn_off_light_when_all_workers_off(self, infrared_sensor_mock: Mock, ):
         with patch("mock.adafruit_veml7700.VEML7700.lux", PropertyMock()) as mock_lux:
-            mock_lux.return_value = 551.0
-
-            
+            mock_lux.return_value = 499.0
+            infrared_sensor_mock.return_value = False
             self.intelligent_office.manage_light_level()
 
-            led_sensor_mock.assert_called_once_with(self.intelligent_office.LED_PIN, False)
+            for infrared_pin in self.infrared_pins:
+                infrared_sensor_mock.assert_any_call(infrared_pin)
+
             self.assertFalse(self.intelligent_office.light_on)
 
+    @patch.object(GPIO, "input")
+    def test_manage_light_level_turn_off_light_when_all_workers_off(self, infrared_sensor_mock: Mock, ):
+        with patch("mock.adafruit_veml7700.VEML7700.lux", PropertyMock()) as mock_lux:
+            mock_lux.return_value = 499.0
+            infrared_sensor_mock.return_value = True
+            self.intelligent_office.manage_light_level()
+
+            infrared_sensor_mock.assert_called_with(self.infrared_pins[0])
+
+            self.assertTrue(self.intelligent_office.light_on)
 
 

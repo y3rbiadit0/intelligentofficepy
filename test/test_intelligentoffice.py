@@ -40,6 +40,15 @@ class TestIntelligentOffice(unittest.TestCase):
 
         self.assertRaises(IntelligentOfficeError, intelligent_office.check_quadrant_occupancy, not_valid_infrared_pin)
 
-    @patch.object(GPIO, "input")
-    def test_check_quadrant_occupancy_not_valid_pin(self, infrared_sensor_mock: Mock):
-        pass
+    @patch.object(IntelligentOffice, "change_servo_angle")
+    @patch.object(SDL_DS3231, "read_datetime")
+    def test_manage_blinds_based_on_time_open(self, read_datetime_mock: Mock, change_servo_angle_mock: Mock):
+        read_datetime_mock.return_value = datetime(2024, 10, 10, 8, 0, 0)
+        intelligent_office = IntelligentOffice()
+
+        intelligent_office.manage_blinds_based_on_time()
+        change_servo_angle_mock.assert_called_once_with(12) # (180/18) + 2
+        self.assertTrue(intelligent_office.blinds_open)
+
+
+

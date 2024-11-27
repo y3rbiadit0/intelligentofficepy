@@ -71,10 +71,14 @@ class IntelligentOffice:
                 self.blinds_open = False
 
     def manage_light_level(self) -> None:
-        if self.ambient_light_sensor.lux < 500:
-            GPIO.output(self.LED_PIN, True)
-            self.light_on = True
-        elif self.ambient_light_sensor.lux > 550:
+        if any(self.check_quadrant_occupancy(pin) for pin in [self.INFRARED_PIN1, self.INFRARED_PIN2, self.INFRARED_PIN3, self.INFRARED_PIN4]):
+            if self.ambient_light_sensor.lux < 500:
+                GPIO.output(self.LED_PIN, True)
+                self.light_on = True
+            elif self.ambient_light_sensor.lux > 550:
+                GPIO.output(self.LED_PIN, False)
+                self.light_on = False
+        else:
             GPIO.output(self.LED_PIN, False)
             self.light_on = False
 

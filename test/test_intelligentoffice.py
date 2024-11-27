@@ -74,3 +74,17 @@ class TestIntelligentOffice(unittest.TestCase):
             change_servo_angle_mock.assert_not_called()  # (0/18) + 2
             self.assertFalse(intelligent_office.blinds_open)
 
+
+    @patch.object(GPIO, "output")
+    def test_manage_light_level_turn_on(self, led_sensor_mock: Mock):
+        with patch("mock.adafruit_veml7700.VEML7700.lux", PropertyMock()) as mock_lux:
+            mock_lux.return_value = 499.0
+
+            intelligent_office = IntelligentOffice()
+            intelligent_office.manage_light_level()
+
+            led_sensor_mock.assert_called_once_with(intelligent_office.LED_PIN, True)
+            self.assertTrue(intelligent_office.light_on)
+
+
+

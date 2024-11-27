@@ -43,12 +43,34 @@ class TestIntelligentOffice(unittest.TestCase):
     @patch.object(IntelligentOffice, "change_servo_angle")
     @patch.object(SDL_DS3231, "read_datetime")
     def test_manage_blinds_based_on_time_open(self, read_datetime_mock: Mock, change_servo_angle_mock: Mock):
-        read_datetime_mock.return_value = datetime(2024, 10, 10, 8, 0, 0)
+        read_datetime_mock.return_value = datetime(2024, 10, 7, 8, 0, 0)
         intelligent_office = IntelligentOffice()
 
         intelligent_office.manage_blinds_based_on_time()
         change_servo_angle_mock.assert_called_once_with(12) # (180/18) + 2
         self.assertTrue(intelligent_office.blinds_open)
 
+    @patch.object(IntelligentOffice, "change_servo_angle")
+    @patch.object(SDL_DS3231, "read_datetime")
+    def test_manage_blinds_based_on_time_closes(self, read_datetime_mock: Mock,
+                                              change_servo_angle_mock: Mock):
+        read_datetime_mock.return_value = datetime(2024, 10, 10, 20, 0, 0)
+        intelligent_office = IntelligentOffice()
+        intelligent_office.blinds_open = True
 
+        intelligent_office.manage_blinds_based_on_time()
+        change_servo_angle_mock.assert_called_once_with(2)  # (0/18) + 2
+        self.assertFalse(intelligent_office.blinds_open)
+
+    @patch.object(IntelligentOffice, "change_servo_angle")
+    @patch.object(SDL_DS3231, "read_datetime")
+    def test_manage_blinds_based_on_time_saturday_sunday(self, read_datetime_mock: Mock,
+                                                change_servo_angle_mock: Mock):
+
+        read_datetime_mock.side_effect = [datetime(2024, 10, 5, 20, 0, 0), datetime(2024, 10, 6, 20, 0, 0)]
+        intelligent_office = IntelligentOffice()
+        for _ in read_datetime_mock.side_effect:
+            intelligent_office.manage_blinds_based_on_time()
+            change_servo_angle_mock.assert_not_called()  # (0/18) + 2
+            self.assertFalse(intelligent_office.blinds_open)
 

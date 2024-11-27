@@ -87,7 +87,7 @@ class TestIntelligentOffice(unittest.TestCase):
             self.assertTrue(intelligent_office.light_on)
 
     @patch.object(GPIO, "output")
-    def test_manage_light_level_turn_on(self, led_sensor_mock: Mock):
+    def test_manage_light_level_turn_off(self, led_sensor_mock: Mock):
         with patch("mock.adafruit_veml7700.VEML7700.lux", PropertyMock()) as mock_lux:
             mock_lux.return_value = 551.0
 

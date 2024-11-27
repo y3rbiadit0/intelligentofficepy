@@ -120,3 +120,12 @@ class TestIntelligentOffice(unittest.TestCase):
             self.assertTrue(self.intelligent_office.light_on)
 
 
+    @patch.object(GPIO, "input")
+    @patch.object(GPIO, "output")
+    def test_monitor_light_turn_on_buzzer_if_gas_detected(self, buzzer_mock: Mock, gas_smoke_detector: Mock):
+        gas_smoke_detector.return_value = True
+        self.intelligent_office.monitor_air_quality()
+
+        gas_smoke_detector.assert_called_once_with(self.intelligent_office.GAS_PIN)
+        buzzer_mock.assert_called_with(self.intelligent_office.BUZZER_PIN, True)
+        self.assertTrue(self.intelligent_office.buzzer_on)
